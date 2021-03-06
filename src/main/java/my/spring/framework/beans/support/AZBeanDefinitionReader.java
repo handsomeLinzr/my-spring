@@ -20,7 +20,7 @@ import java.util.Properties;
  */
 public class AZBeanDefinitionReader {
 
-    private Properties properties = new Properties();
+    private Properties config = new Properties();
     private static final String SCAN_PATH = "scanPackage";
     private List<String> registerBeanClasses = new ArrayList<>();
 
@@ -29,7 +29,7 @@ public class AZBeanDefinitionReader {
         InputStream in = this.getClass().getClassLoader().getResourceAsStream(locations[0].replace("classpath:", ""));
         // 加载配置
         try {
-            properties.load(in);
+            config.load(in);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -42,7 +42,7 @@ public class AZBeanDefinitionReader {
             }
         }
         // 扫描配置
-        doScanner(this.properties.getProperty(SCAN_PATH));
+        doScanner(this.config.getProperty(SCAN_PATH));
     }
 
     // 扫描配置，并把所有的class名加到容器中
@@ -104,6 +104,10 @@ public class AZBeanDefinitionReader {
         char[] chars = name.toCharArray();
         chars[0] += 32;
         return String.valueOf(chars);
+    }
+
+    public Properties getConfig() {
+        return this.config;
     }
 
 }

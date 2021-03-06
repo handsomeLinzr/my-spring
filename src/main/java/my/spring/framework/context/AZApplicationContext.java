@@ -16,6 +16,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -31,6 +32,8 @@ public class AZApplicationContext extends AZDefaultListableBeanFactory implement
 
     // 配置文件
     private String[] locations;
+
+    AZBeanDefinitionReader reader = null;
 
     // 单例bean缓存容器（一级缓存）
     private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
@@ -51,7 +54,7 @@ public class AZApplicationContext extends AZDefaultListableBeanFactory implement
     @Override
     public void refresh() throws Exception {
         // 定位
-        AZBeanDefinitionReader reader = new AZBeanDefinitionReader(this.locations);
+        reader = new AZBeanDefinitionReader(this.locations);
 
         // 加载
         List<AZBeanDefinition> beanDefinitions = reader.loadBeanDefinitions();
@@ -159,4 +162,13 @@ public class AZApplicationContext extends AZDefaultListableBeanFactory implement
         }
         return singleObject;
     }
+
+    public String[] getBeanDefinitionNames() {
+        return super.beanDefinitionMap.keySet().toArray(new String[super.beanDefinitionMap.size()]);
+    }
+
+    public Properties getConfig() {
+        return this.reader.getConfig();
+    }
+
 }
