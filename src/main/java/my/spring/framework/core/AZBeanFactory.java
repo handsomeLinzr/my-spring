@@ -15,4 +15,7 @@ public interface AZBeanFactory {
      * @return
      */
     Object getBean(String beanName) throws Exception;
+
+    Object getBean(Class<?> clazz) throws Exception;
+
 }

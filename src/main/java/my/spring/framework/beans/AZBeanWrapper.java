@@ -15,6 +15,7 @@ public class AZBeanWrapper {
 
     public AZBeanWrapper(Object wrappedInstance) {
         this.wrappedInstance = wrappedInstance;
+        this.wrappedClass = wrappedInstance.getClass();
     }
 
     public Object getWrappedInstance() {
@@ -22,6 +23,6 @@ public class AZBeanWrapper {
     }
 
     public Class<?> getWrappedClass() {
-        return this.wrappedClass;
+        return wrappedInstance.getClass();
     }
 }

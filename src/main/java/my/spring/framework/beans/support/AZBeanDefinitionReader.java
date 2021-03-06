@@ -48,7 +48,7 @@ public class AZBeanDefinitionReader {
     // 扫描配置，并把所有的class名加到容器中
     // scanPath: xx.xx.xx
     private void doScanner(String scanPath) {
-        URL url = this.getClass().getClassLoader().getResource( scanPath.replaceAll("\\.", "/"));
+        URL url = this.getClass().getClassLoader().getResource(scanPath.replaceAll("\\.", "/"));
         File classPath = new File(url.getFile());
         for (File file : classPath.listFiles()) {
             if (file.isDirectory()) {
@@ -83,8 +83,8 @@ public class AZBeanDefinitionReader {
                 for (Class<?> i : clazz.getInterfaces()) {
                     result.add(doCreateBeanDefinition(i.getSimpleName(), clazz.getName()));
                 }
-                return result;
             }
+            return result;
         } catch (Exception e) {
             e.printStackTrace();
         }
