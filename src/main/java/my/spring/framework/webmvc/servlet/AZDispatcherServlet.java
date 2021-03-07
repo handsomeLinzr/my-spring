@@ -35,8 +35,6 @@ public class AZDispatcherServlet extends HttpServlet {
 
     private final Map<AZHandlerMapping, AZHandlerAdapter> handlerAdapters = new ConcurrentHashMap<>();
 
-    private final List<AZViewResolver> viewResolvers = new ArrayList<>();
-
     // 初始化方法
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -81,13 +79,6 @@ public class AZDispatcherServlet extends HttpServlet {
     }
 
     private void initViewResolvers(AZApplicationContext context) {
-        String templateRoot = context.getConfig().getProperty(TEMPLATE_ROOT);
-        String templateRootPath = this.getClass().getClassLoader().getResource(templateRoot).getFile();
-        File templateRootDir = new File(templateRootPath);
-        // 每个页面对应一个viewResolver
-        for (String template : templateRootDir.list()) {
-            viewResolvers.add(new AZViewResolver(templateRoot));
-        }
     }
 
     private void initRequestToViewNameTranslator(AZApplicationContext context) {
@@ -181,10 +172,6 @@ public class AZDispatcherServlet extends HttpServlet {
     }
 
     private void processDispatchResult(HttpServletRequest req, HttpServletResponse resp, ModelAndView mv) {
-        // 将mv转成页面输出
-        if (this.viewResolvers.isEmpty()) {
-            return;
-        }
 
     }
 
