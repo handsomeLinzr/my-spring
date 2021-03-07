@@ -1,5 +1,6 @@
 package my.spring.framework.demo.controller;
 
+import jdk.nashorn.internal.objects.NativeUint8Array;
 import my.spring.framework.annotation.AZAutowire;
 import my.spring.framework.annotation.AZController;
 import my.spring.framework.annotation.AZRequestMapping;
@@ -33,6 +34,19 @@ public class ActionController {
             return new AZModelAndView("500", paramsValue);
         }
         return modelAndView;
+    }
+
+    @AZRequestMapping("add")
+    public AZModelAndView add(@AZRequestParam("name") String name) {
+        try {
+            int i = 1 / 0;
+        } catch (Exception e) {
+            Map<String, Object> paramsValue = new HashMap<>(2);
+            paramsValue.put("detail", e.getMessage());
+            paramsValue.put("stackTrace", Arrays.toString(e.getStackTrace()));
+            return new AZModelAndView("500", paramsValue);
+        }
+        return null;
     }
 
     private AZModelAndView out(HttpServletResponse response, String result) throws Exception {

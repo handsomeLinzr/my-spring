@@ -7,6 +7,6 @@ import my.spring.framework.demo.service.IQueryService;
 public class QueryServiceImpl implements IQueryService {
     @Override
     public String query(String name) {
-        return "query:" + name + "SUCCESS";
+        return "query:" + name + ",SUCCESS";
     }
 }

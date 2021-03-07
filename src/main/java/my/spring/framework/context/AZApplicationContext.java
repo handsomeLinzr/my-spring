@@ -95,6 +95,10 @@ public class AZApplicationContext extends AZDefaultListableBeanFactory implement
     @Override
     public Object getBean(String beanName) throws Exception{
 
+            if (this.factoryBeanInstanceCache.containsKey(beanName)) {
+                return this.factoryBeanInstanceCache.get(beanName).getWrappedInstance();
+            }
+
             AZBeanDefinition beanDefinition = super.beanDefinitionMap.get(beanName);
 
             Object instance = null;
