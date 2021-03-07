@@ -81,8 +81,9 @@ public class AZApplicationContext extends AZDefaultListableBeanFactory implement
     private void doAutowired() {
         for (Map.Entry<String, AZBeanDefinition> beanDefinitionEntry : super.beanDefinitionMap.entrySet()) {
             if (!beanDefinitionEntry.getValue().isLazyInit()) {
+                String beanName = beanDefinitionEntry.getKey();
                 try {
-                    getBean(beanDefinitionEntry.getKey());
+                    getBean(beanName);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -143,6 +144,9 @@ public class AZApplicationContext extends AZDefaultListableBeanFactory implement
             }
 
             file.setAccessible(true);
+            if (this.factoryBeanInstanceCache.get(autowiredName) == null) {
+                getBean(autowiredName);
+            }
             file.set(instance, this.factoryBeanInstanceCache.get(autowiredName).getWrappedInstance());
         }
     }

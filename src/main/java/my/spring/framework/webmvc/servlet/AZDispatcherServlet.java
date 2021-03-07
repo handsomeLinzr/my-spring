@@ -14,9 +14,9 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,6 +34,8 @@ public class AZDispatcherServlet extends HttpServlet {
     private final List<AZHandlerMapping> handlerMappings = new ArrayList<>();
 
     private final Map<AZHandlerMapping, AZHandlerAdapter> handlerAdapters = new ConcurrentHashMap<>();
+
+    private final List<AZViewResolver> viewResolvers = new ArrayList<>();
 
     // 初始化方法
     @Override
@@ -79,6 +81,14 @@ public class AZDispatcherServlet extends HttpServlet {
     }
 
     private void initViewResolvers(AZApplicationContext context) {
+        String templateRoot = context.getConfig().getProperty(TEMPLATE_ROOT);
+        // 获得路径
+        String templateRootPath = this.getClass().getClassLoader().getResource(templateRoot).getFile();
+
+        File templateRootDir = new File(templateRootPath);
+        for (String templateFileName : templateRootDir.list()) {
+            this.viewResolvers.add(new AZViewResolver(templateRoot));
+        }
     }
 
     private void initRequestToViewNameTranslator(AZApplicationContext context) {
@@ -116,7 +126,7 @@ public class AZDispatcherServlet extends HttpServlet {
                 if (!method.isAnnotationPresent(AZRequestMapping.class)) {continue;}
                 AZRequestMapping methodMapping = method.getAnnotation(AZRequestMapping.class);
 
-                String regex = "/" + basePath + "/" + methodMapping.value().replaceAll("\\*", ".*").replaceAll("/+", "/");
+                String regex = ("/" + basePath + "/" + methodMapping.value()).replaceAll("\\*", ".*").replaceAll("/+", "/");
                 Pattern pattern = Pattern.compile(regex);
                 this.handlerMappings.add(new AZHandlerMapping(pattern, controller, method));
                 log.info("Mapped " + regex + "," + method);
@@ -155,24 +165,39 @@ public class AZDispatcherServlet extends HttpServlet {
         // 1.通过请求拿到url,获得handlerMapping
         AZHandlerMapping handler = getHandler(req);
         if (handler == null) {
-            resp.getWriter().write("404");
+            processDispatchResult(req, resp, new AZModelAndView("404", null));
+            return;
         }
 
         // 2.获得handlerAdapter，准备调用前的数据
         AZHandlerAdapter ha = getHandlerAdapter(handler);
         if (ha == null) {
-            resp.getWriter().write("500");
+            Map<String, Object> paramsValue = new HashMap<>();
+            paramsValue.put("detail", "服务器忙");
+            processDispatchResult(req, resp, new AZModelAndView("404", paramsValue));
+            return;
         }
 
         // 3.真正调用方法，返回ModelAndView，存储了页面数据和页面模板名称
-        ModelAndView mv = ha.handler(req, resp, handler);
+        AZModelAndView mv = ha.handler(req, resp, handler);
 
         // 4.输出渲染
         processDispatchResult(req, resp, mv);
     }
 
-    private void processDispatchResult(HttpServletRequest req, HttpServletResponse resp, ModelAndView mv) {
+    private void processDispatchResult(HttpServletRequest req, HttpServletResponse resp, AZModelAndView mv) throws Exception {
+        // 将mv输出成模板通过response输送出去
+        // 1.寻找对应的视图解析器ViewResolver
+        if (null == mv) { return; }
+        if (this.viewResolvers.isEmpty()) { return; }
 
+        // 2.通过视图解析器获得View
+        // 3.通过View渲染出去
+        for (AZViewResolver viewResolver : viewResolvers) {
+            AZView view = viewResolver.resolveViewName(mv.getViewName(), null);
+            view.render(mv.getModel(), req, resp);
+            return;
+        }
     }
 
     private AZHandlerAdapter getHandlerAdapter(AZHandlerMapping handler) {

@@ -81,7 +81,7 @@ public class AZBeanDefinitionReader {
 
                 // 设置类上的所有接口
                 for (Class<?> i : clazz.getInterfaces()) {
-                    result.add(doCreateBeanDefinition(i.getSimpleName(), clazz.getName()));
+                    result.add(doCreateBeanDefinition(i.getName(), clazz.getName()));
                 }
             }
             return result;
