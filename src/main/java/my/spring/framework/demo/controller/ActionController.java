@@ -5,6 +5,7 @@ import my.spring.framework.annotation.AZAutowire;
 import my.spring.framework.annotation.AZController;
 import my.spring.framework.annotation.AZRequestMapping;
 import my.spring.framework.annotation.AZRequestParam;
+import my.spring.framework.demo.service.IModifyService;
 import my.spring.framework.demo.service.IQueryService;
 import my.spring.framework.webmvc.servlet.AZModelAndView;
 
@@ -20,6 +21,9 @@ public class ActionController {
 
     @AZAutowire
     private IQueryService queryService;
+
+    @AZAutowire
+    private IModifyService modifyService;
 
     @AZRequestMapping("/query")
     public AZModelAndView query(HttpServletRequest request, HttpServletResponse response, @AZRequestParam("name") String name) {
@@ -47,6 +51,12 @@ public class ActionController {
             return new AZModelAndView("500", paramsValue);
         }
         return null;
+    }
+
+    @AZRequestMapping("/first")
+    public AZModelAndView first(@AZRequestParam("teacher") String teacher, @AZRequestParam("data") String data) {
+        Map<String, Object> value = modifyService.makeData(teacher, data);
+        return new AZModelAndView("first", value);
     }
 
     private AZModelAndView out(HttpServletResponse response, String result) throws Exception {
