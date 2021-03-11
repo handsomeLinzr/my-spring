@@ -1,19 +1,21 @@
 package my.spring.framework.context;
 
-import com.sun.xml.internal.messaging.saaj.packaging.mime.util.BEncoderStream;
 import my.spring.framework.annotation.AZAutowire;
 import my.spring.framework.annotation.AZController;
 import my.spring.framework.annotation.AZService;
+import my.spring.framework.aop.AZAopProxy;
+import my.spring.framework.aop.AZCglibAopProxy;
+import my.spring.framework.aop.AZJdkDynamicAopProxy;
+import my.spring.framework.aop.config.AZAopConfig;
+import my.spring.framework.aop.support.AZAdvisedSupport;
 import my.spring.framework.beans.AZBeanWrapper;
 import my.spring.framework.beans.config.AZBeanDefinition;
 import my.spring.framework.beans.config.AZBeanPostProcessor;
 import my.spring.framework.beans.support.AZBeanDefinitionReader;
 import my.spring.framework.beans.support.AZDefaultListableBeanFactory;
 import my.spring.framework.core.AZBeanFactory;
-import org.omg.PortableInterceptor.INACTIVE;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -32,6 +34,14 @@ public class AZApplicationContext extends AZDefaultListableBeanFactory implement
 
     // 配置文件
     private String[] locations;
+
+    //  定义aop的配置名
+    private static final String POINT_CUT = "pointCut";
+    private static final String ASPECT_CLASS = "aspectClass";
+    private static final String ASPECT_BEFORE = "aspectBefore";
+    private static final String ASPECT_AFTER = "aspectAfter";
+    private static final String ASPECT_AFTER_THROW = "aspectAfterThrow";
+    private static final String ASPECT_AFTER_THROWING_NAME = "aspectAfterThrowingName";
 
     AZBeanDefinitionReader reader = null;
 
@@ -158,17 +168,48 @@ public class AZApplicationContext extends AZDefaultListableBeanFactory implement
     // 实例化
     private Object instantiateBean(String beanName, AZBeanDefinition beanDefinition) throws Exception {
 
-        Object singleObject = this.singletonObjects.get(beanName);
-        if (singleObject == null) {
+        Object instance = this.singletonObjects.get(beanName);
+        if (instance == null) {
             String beanClassName = beanDefinition.getBeanClassName();
             Class<?> clazz = Class.forName(beanClassName);
-            singleObject = clazz.newInstance();
+            instance = clazz.newInstance();
+
+            // 根读取配置信息，封装成advisedSupport
+            AZAdvisedSupport config = instantionAopConfig(beanDefinition);
+            config.setTargetClass(clazz);
+            config.setTarget(instance);
+            // 匹配上则创建代理，并替换当前instance
+            if (config.pointCutMatch()) {
+                // 根据config自动选择策略获得代理方式
+                instance = createProxy(config).getProxy();
+            }
 
             // 放入缓存
-            this.singletonObjects.put(beanName, singleObject);
-            this.singletonObjects.put(beanClassName, singleObject);
+            this.singletonObjects.put(beanDefinition.getFactoryBeanName(), instance);
+            this.singletonObjects.put(beanClassName, instance);
         }
-        return singleObject;
+        return instance;
+    }
+
+    private AZAopProxy createProxy(AZAdvisedSupport config) {
+        Class<?> clazz = config.getTarget().getClass();
+        if (clazz.getInterfaces().length > 0 ) {
+            // 有接口
+            return new AZJdkDynamicAopProxy(config);
+        }
+        return new AZCglibAopProxy(config);
+    }
+
+    // 配置advisedSupport
+    private AZAdvisedSupport instantionAopConfig(AZBeanDefinition beanDefinition) {
+        AZAopConfig config = new AZAopConfig();
+        config.setPointCut(this.reader.getConfig().getProperty(POINT_CUT));
+        config.setAspectClass(this.reader.getConfig().getProperty(ASPECT_CLASS));
+        config.setAspectBefore(this.reader.getConfig().getProperty(ASPECT_BEFORE));
+        config.setAspectAfter(this.reader.getConfig().getProperty(ASPECT_AFTER));
+        config.setAspectAfterThrow(this.reader.getConfig().getProperty(ASPECT_AFTER_THROW));
+        config.setAspectAfterThrowingName(this.reader.getConfig().getProperty(ASPECT_AFTER_THROWING_NAME));
+        return new AZAdvisedSupport(config);
     }
 
     public String[] getBeanDefinitionNames() {

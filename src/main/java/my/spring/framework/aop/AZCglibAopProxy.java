@@ -1,5 +1,7 @@
 package my.spring.framework.aop;
 
+import my.spring.framework.aop.support.AZAdvisedSupport;
+
 /**
  * Description:
  *
@@ -9,6 +11,9 @@ package my.spring.framework.aop;
  * @since V1.0.0
  */
 public class AZCglibAopProxy implements AZAopProxy{
+    public AZCglibAopProxy(AZAdvisedSupport config) {
+    }
+
     @Override
     public Object getProxy() {
         return null;
