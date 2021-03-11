@@ -43,7 +43,7 @@ public class ActionController {
     @AZRequestMapping("add")
     public AZModelAndView add(@AZRequestParam("name") String name) {
         try {
-            int i = 1 / 0;
+            String result = queryService.add(name);
         } catch (Exception e) {
             Map<String, Object> paramsValue = new HashMap<>(2);
             paramsValue.put("detail", e.getMessage());

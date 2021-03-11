@@ -9,7 +9,7 @@ import java.lang.reflect.Proxy;
 import java.util.List;
 
 /**
- * Description:
+ * Description: JDK代理类
  *
  * @author Linzr
  * @version V1.0.0
@@ -37,7 +37,7 @@ public class AZJdkDynamicAopProxy implements AZAopProxy, InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, this.advised.getTargetClass());
-        AZMethodInvocation invocation = new AZMethodInvocation(proxy, null, method, args, this.advised.getTargetClass(), chain);
+        AZMethodInvocation invocation = new AZMethodInvocation(proxy, this.advised.getTarget(), method, args, this.advised.getTargetClass(), chain);
         return invocation.proceed();
     }
 }
