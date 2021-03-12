@@ -4,7 +4,7 @@ import my.spring.framework.annotation.AZService;
 import my.spring.framework.demo.service.IQueryService;
 
 @AZService
-public class QueryService implements IQueryService {
+public class QueryServiceImpl implements IQueryService {
     @Override
     public String query(String name) {
         return "query:" + name + ",SUCCESS";

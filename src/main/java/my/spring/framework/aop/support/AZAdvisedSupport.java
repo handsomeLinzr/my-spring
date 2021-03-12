@@ -59,13 +59,13 @@ public class AZAdvisedSupport {
     }
 
     private void parse() {
-        // public .* my.spring.framework.demo.service..*Service..*(.*)
+        // public .* my.spring.framework.demo.service..*Service*.*(.*)
         String pointCut = config.getPointCut()
                 .replaceAll("\\.", "\\\\.")
                 .replaceAll("\\\\.\\*", ".*")
                 .replaceAll("\\(", "\\\\(")
                 .replaceAll("\\)", "\\\\)");
-        String pointCutForClassRegex = pointCut.substring(0, pointCut.lastIndexOf("\\(")-4);
+        String pointCutForClassRegex = pointCut.substring(0, pointCut.lastIndexOf("\\("));
         pointCutClassPattern = Pattern.compile("class " + pointCutForClassRegex.substring(pointCutForClassRegex.lastIndexOf(" ")+1));
 
         try {

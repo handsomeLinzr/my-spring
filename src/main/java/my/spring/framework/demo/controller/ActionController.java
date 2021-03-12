@@ -11,6 +11,7 @@ import my.spring.framework.webmvc.servlet.AZModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +47,7 @@ public class ActionController {
             String result = queryService.add(name);
         } catch (Exception e) {
             Map<String, Object> paramsValue = new HashMap<>(2);
-            paramsValue.put("detail", e.getMessage());
+            paramsValue.put("detail", ((UndeclaredThrowableException) e).getUndeclaredThrowable().getCause().getMessage());
             paramsValue.put("stackTrace", Arrays.toString(e.getStackTrace()));
             return new AZModelAndView("500", paramsValue);
         }

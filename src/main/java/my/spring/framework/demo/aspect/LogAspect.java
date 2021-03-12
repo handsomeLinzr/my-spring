@@ -34,7 +34,7 @@ public class LogAspect {
         log.info("出现异常" +
                 "\nTargetObject:" +  joinPoint.getThis() +
                 "\nArgs:" + Arrays.toString(joinPoint.getArguments()) +
-                "\nThrows:" + ex.getMessage());
+                "\nThrows:" + ex.getCause());
     }
 
 }
